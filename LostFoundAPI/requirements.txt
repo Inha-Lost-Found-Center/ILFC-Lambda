@@ -1,0 +1,19 @@
+# 1. FastAPI 코어
+fastapi
+# 2. Lambda <-> FastAPI 연결 (필수)
+mangum
+# 3. 로컬 테스트용 서버 (람다 배포 시엔 불필요하나 개발 시 필요)
+uvicorn
+# 4. DB 연결 (PostgreSQL)
+SQLAlchemy
+psycopg2-binary
+# 5. JWT 토큰 (인증)
+python-jose[cryptography]
+passlib
+bcrypt==4.0.1
+# 환경변수 관리
+python-dotenv
+# Pydantic 이메일 검증용
+pydantic[email]
+# Pydantic이 .env 파일을 읽을 수 있게 해주는 공식 라이브러리
+pydantic-settings

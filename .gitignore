@@ -1,1 +1,4 @@
 /.idea/
+/venv
+/LostFoundAPI/.env
+.env
