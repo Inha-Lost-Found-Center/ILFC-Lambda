@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
-from app.models import LostItems, Users
+from app.models import LostItems, Users, Tags, LostItem_Tags
+from typing import List, Optional
 import datetime
 from app.service import pickup_code_service
 
@@ -66,7 +67,6 @@ def get_claimed_items_by_user(db: Session, current_user: Users):
     )
 
 # 1.6 나의 분실물 상세+코드 (서비스 로직)
-# ------------------------------------------------------------------
 def get_my_claimed_item_details(db: Session, item_id: int, current_user: Users):
     """
     현재 사용자가 '주인 등록'한 특정 아이템의 상세 정보와
@@ -101,3 +101,36 @@ def get_my_claimed_item_details(db: Session, item_id: int, current_user: Users):
         db.refresh(pickup_code)
 
     return {"item": item, "pickup_code": pickup_code}
+
+# 1.2 (신규) 검색어 + 태그 검색 (서비스 로직)
+def search_items(db: Session, q: Optional[str], tags: Optional[List[int]]):
+    """
+    검색어(q)와 태그 ID 리스트(tags)로 분실물을 검색합니다.
+    """
+
+    query = (
+        db.query(LostItems)
+        .options(joinedload(LostItems.tags)) # 항상 태그 정보를 포함 (N+1 방지)
+    )
+
+    # [검색어] q가 존재하면, 'description' 또는 'location'에서 검색
+    if q:
+        search_query = f"%{q}%"
+        # (참고) 검색할 컬럼 추가 가능 (예: device_name)
+        query = query.filter(
+            (LostItems.description.ilike(search_query)) |
+            (LostItems.location.ilike(search_query))
+        )
+
+    # [태그] tags 리스트가 존재하면, 해당 태그 ID를 모두 포함하는 아이템 검색
+    if tags:
+        # LostItems가 LostItem_Tags를 통해 Tags와 연결되므로,
+        # LostItem_Tags 테이블을 명시적으로 조인해야 함
+        query = query.join(LostItem_Tags).filter(LostItem_Tags.tag_id.in_(tags))
+
+    # '분실' 상태인 것만 검색
+    query = query.filter(LostItems.status.in_(["분실"]))
+    
+    query = query.group_by(LostItems.id)
+
+    return query.all()

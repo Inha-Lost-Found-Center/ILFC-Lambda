@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 import app.schemas.item as item_schema
 from app.db.session import get_db
@@ -19,6 +19,27 @@ async def get_all_lost_items(
     모든 분실물 리스트를 반환합니다.
     """
     items = item_service.get_all_items_with_tags(db=db)
+    return items
+
+# 1.2 검색어 + 태그 검색 API
+@router.get("/search", response_model=List[item_schema.ItemResponse])
+async def search_lost_items(
+        # 'q': 검색어 (선택 사항, 기본값 None)
+        q: Optional[str] = Query(None, min_length=1, max_length=50),
+
+        # 'tags': 태그 ID 리스트 (선택 사항, 기본값 None)
+        #    (예: /search?tags=1&tags=3)
+        tags: Optional[List[int]] = Query(None),
+
+        db: Session = Depends(get_db)
+):
+    """
+    (1.2) 검색어(q) 및/또는 태그(tags)로 분실물을 검색합니다.
+    - q: 검색어
+    - tags: 태그 ID 리스트 (여러 개 가능)
+    """
+
+    items = item_service.search_items(db=db, q=q, tags=tags)
     return items
 
 # 1.5 (GET /me) - 나의 분실물 리스트 (신규)
