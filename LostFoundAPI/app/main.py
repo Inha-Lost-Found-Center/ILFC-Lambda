@@ -8,7 +8,8 @@ from app.controller import tags as tags_router
 app = FastAPI(
     title="Inha LostFound API",
     version="0.1.0",
-    root_path="/web"
+    openapi_prefix="/main",
+    openapi_url="/openapi.json"
 )
 
 # 헬스 체크용 엔드포인트
