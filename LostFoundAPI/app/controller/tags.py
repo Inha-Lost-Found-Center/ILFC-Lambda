@@ -3,9 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.db.session import get_db
-from app.models import Tags
-
 from app.schemas.tag import TagResponse
+from app.service import tag_service
 
 router = APIRouter()
 
@@ -16,5 +15,5 @@ async def get_all_tags(
     """
     DB에 저장된 모든 태그 리스트를 반환합니다.
     """
-    tags = db.query(Tags).all()
+    tags = tag_service.get_all_tags(db=db)
     return tags
