@@ -2,6 +2,7 @@ from pydantic import BaseModel
 import datetime
 from typing import List
 from .tag import TagResponse
+from .pickup_code import PickupCodeResponse
 
 # Item 응답 스키마
 class ItemResponse(BaseModel):
@@ -15,3 +16,8 @@ class ItemResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# 1.4 API를 위한 전용 응답 스키마
+class ClaimResponse(BaseModel):
+    item: ItemResponse
+    pickup_code: PickupCodeResponse
