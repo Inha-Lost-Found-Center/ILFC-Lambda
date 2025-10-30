@@ -64,3 +64,40 @@ def get_claimed_items_by_user(db: Session, current_user: Users):
         .options(joinedload(LostItems.tags))
         .all()
     )
+
+# 1.6 나의 분실물 상세+코드 (서비스 로직)
+# ------------------------------------------------------------------
+def get_my_claimed_item_details(db: Session, item_id: int, current_user: Users):
+    """
+    현재 사용자가 '주인 등록'한 특정 아이템의 상세 정보와
+    픽업 코드를 (필요시 재발급하여) 반환합니다.
+    """
+
+    item = get_item_by_id_with_tags(db, item_id=item_id)
+
+    if not item:
+        return None # 404 Not Found
+
+    if item.found_by_user_id != current_user.id:
+        return "FORBIDDEN" # 403 Forbidden
+
+    pickup_code = item.pickup_code
+    if not pickup_code:
+        return "CODE_NOT_FOUND" # 500 Internal Error
+
+    if pickup_code.expires_at <= datetime.datetime.utcnow():
+        # 코드가 만료됨! 새 코드로 재발급
+        print(f"Pickup code {pickup_code.code} expired. Reissuing...")
+
+        new_code_str = pickup_code_service.generate_unique_code(db)
+        new_expires_at = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+
+        pickup_code.code = new_code_str
+        pickup_code.expires_at = new_expires_at
+        pickup_code.generated_at = datetime.datetime.utcnow()
+        pickup_code.is_used = False # (혹시 모르니 초기화)
+
+        db.commit()
+        db.refresh(pickup_code)
+
+    return {"item": item, "pickup_code": pickup_code}

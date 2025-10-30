@@ -38,6 +38,41 @@ async def get_my_claimed_items(
     )
     return items
 
+# 1.6 나의 분실물 상세+코드 확인 API
+# ------------------------------------------------------------------
+@router.get("/me/{item_id}", response_model=item_schema.MyItemDetailResponse)
+async def get_my_claimed_item_detail(
+        item_id: int,
+        db: Session = Depends(get_db),
+        current_user: Users = Depends(get_current_user)
+):
+    """
+    (인증 필요) 현재 사용자가 '주인 등록'한 특정 아이템의
+    상세 정보와 픽업 코드를 (만료 시 재발급하여) 반환합니다.
+    """
+
+    data = item_service.get_my_claimed_item_details(
+        db=db, item_id=item_id, current_user=current_user
+    )
+
+    if data is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found"
+        )
+    if data == "FORBIDDEN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this item's code"
+        )
+    if data == "CODE_NOT_FOUND":
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not find pickup code associated with this item"
+        )
+
+    return data
+
 # 1.3 (GET /{item_id}) - 상세 내역
 @router.get("/{item_id}", response_model=item_schema.ItemResponse)
 async def get_item_by_id(

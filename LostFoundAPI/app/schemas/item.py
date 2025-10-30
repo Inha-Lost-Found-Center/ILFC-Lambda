@@ -21,3 +21,10 @@ class ItemResponse(BaseModel):
 class ClaimResponse(BaseModel):
     item: ItemResponse
     pickup_code: PickupCodeResponse
+
+# 1.6 '나의 분실물 상세' 응답 스키마
+# (1.4의 ClaimResponse와 구조가 동일함)
+# ------------------------------------------------------------------
+class MyItemDetailResponse(BaseModel):
+    item: ItemResponse
+    pickup_code: PickupCodeResponse
