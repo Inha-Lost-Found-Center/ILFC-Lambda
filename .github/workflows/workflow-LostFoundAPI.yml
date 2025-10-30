@@ -45,7 +45,7 @@ jobs:
           # requirements.txt에 명시된 라이브러리를 현재 디렉토리에 설치
           pip install -r requirements.txt -t .
           # 설치된 라이브러리와 모든 소스 코드를 함께 압축
-          zip -r ../LostFoundAPI.zip .
+          zip -r ../LostFoundAPI.zip . -x "tests/*"
 
       # 4. AWS 자격 증명을 설정 및 배포
       - name: Configure AWS Credentials
