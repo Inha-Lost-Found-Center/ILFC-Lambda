@@ -51,3 +51,16 @@ def claim_item_by_id(db: Session, item_id: int, current_user: Users):
     db.refresh(new_code)
 
     return {"item": item, "pickup_code": new_code}
+
+# 1.5 나의 분실물 리스트 확인 (서비스 로직)
+def get_claimed_items_by_user(db: Session, current_user: Users):
+    """
+    현재 사용자가 '주인 등록(claim)'한 모든 분실물 리스트를 조회합니다.
+    (상태가 '보관' 또는 '찾음'인 아이템)
+    """
+    return (
+        db.query(LostItems)
+        .filter(LostItems.found_by_user_id == current_user.id)
+        .options(joinedload(LostItems.tags))
+        .all()
+    )
