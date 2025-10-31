@@ -52,7 +52,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           # ⚠️ IAM 역할 ARN을 입력
-          role-to-assume: arn:aws:iam::327784329358:role/SafeRoleForUser-inha-capstone-14
+          role-to-assume: arn:aws:iam::327784329358:role/inha-capstone-14-cicd-role
           aws-region: us-west-2
 
       - name: Deploy to AWS Lambda
