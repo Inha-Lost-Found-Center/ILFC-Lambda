@@ -33,9 +33,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Python 환경 설정 단계는 제거 (Docker 사용)
+      # 2. Python 환경을 3.13으로 설정
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
 
-      # 3. 라이브러리를 설치하고 배포용 zip 생성 (Lambda 호환 빌드)
+      # 3. 라이브러리를 설치하고 배포용 zip 생성 (Lambda 3.13 호환 빌드)
       - name: Install dependencies and create ZIP file (Lambda-compatible build)
         run: |
           # 1. LostFoundAPI 디렉토리로 이동
@@ -44,7 +48,7 @@ jobs:
           docker run --rm \
             --entrypoint "/bin/bash" \
             -v "$PWD":/var/task \
-            public.ecr.aws/lambda/python:3.12-x86_64 -c "pip install -r /var/task/requirements.txt -t /var/task"
+            public.ecr.aws/lambda/python:3.13-x86_64 -c "pip install -r /var/task/requirements.txt -t /var/task"
 
           sudo find . -type d -name "__pycache__" -exec rm -rf {} +
           
