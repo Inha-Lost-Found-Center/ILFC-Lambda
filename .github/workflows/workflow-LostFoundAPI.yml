@@ -28,11 +28,16 @@ jobs:
       contents: read
 
     steps:
+      # 1. GitHub 저장소의 코드 이용
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Python 환경 설정 단계는 제거 (Docker 사용)
+
+      # 3. 라이브러리를 설치하고 배포용 zip 생성 (Lambda 호환 빌드)
       - name: Install dependencies and create ZIP file (Lambda-compatible build)
         run: |
+          # 1. LostFoundAPI 디렉토리로 이동
           cd LostFoundAPI
           
           docker run --rm \
@@ -40,8 +45,11 @@ jobs:
             -v "$PWD":/var/task \
             public.ecr.aws/lambda/python:3.12-x86_64 -c "pip install -r /var/task/requirements.txt -t /var/task"
 
+          find . -type d -name "__pycache__" -exec rm -rf {} +
+          
           zip -r ../LostFoundAPI.zip . -x "tests/*"
 
+      # 4. AWS 자격 증명을 설정 및 배포
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
