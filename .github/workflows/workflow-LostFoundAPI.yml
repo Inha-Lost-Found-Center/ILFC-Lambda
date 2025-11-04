@@ -28,23 +28,30 @@ jobs:
       contents: read
 
     steps:
+      # 1. GitHub 저장소의 코드 이용
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies and create ZIP file (Lambda-compatible build)
+      # 2. Python 환경을 설정
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      # 3. 라이브러리를 설치하고 배포용 zip 생성
+      - name: Install dependencies and create ZIP file
         run: |
           cd LostFoundAPI
-      
-          docker run --rm \
-            -v "$PWD":/var/task \
-            public.ecr.aws/lambda/python:3.12-x86_64 bash -c "pip install -r /var/task/requirements.txt -t /var/task"
-
+          # requirements.txt에 명시된 라이브러리를 현재 디렉토리에 설치
+          pip install -r requirements.txt -t .
+          # 설치된 라이브러리와 모든 소스 코드를 함께 압축
           zip -r ../LostFoundAPI.zip . -x "tests/*"
 
       # 4. AWS 자격 증명을 설정 및 배포
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          # ⚠️ IAM 역할 ARN을 입력
           role-to-assume: arn:aws:iam::327784329358:role/inha-capstone-14-cicd-role
           aws-region: us-west-2
 
