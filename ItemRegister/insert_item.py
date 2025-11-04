@@ -24,14 +24,19 @@ def insert_lost_item(file_url, category, description):
     try:
         cursor = conn.cursor()
 
-        # 태그 찾기
-        tag_id = 0
-
-        # INSERT 쿼리
+        # Tag 찾기
         sql = """
-        INSERT INTO "LostItems" (
+        SELECT id FROM tags WHERE name = %s;
+        """
+
+        cursor.execute(sql, (category,))
+
+        tag_id = cursor.fetchone()[0]
+
+        # LostItems 레코드 삽입
+        sql = """
+        INSERT INTO lostitems (
             photo_url,
-            tag_id,
             device_name,
             location,
             registered_at,
@@ -39,7 +44,7 @@ def insert_lost_item(file_url, category, description):
             status,
             created_at,
             updated_at
-        ) VALUES (%s, %s, %s, %s, %s)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id;
         """
 
@@ -47,7 +52,6 @@ def insert_lost_item(file_url, category, description):
 
         params = (
             file_url,
-            tag_id,
             '60주년-1',  # device_name
             '60주년',  # location
             now,  # registered_at
@@ -57,9 +61,31 @@ def insert_lost_item(file_url, category, description):
             now  # updated_at
         )
 
-        # 실행
         cursor.execute(sql, params)
-        record_id = cursor.fetchone()[0]
+        lost_item_id = cursor.fetchone()[0]
+
+        # LostItems_Tags 레코드 삽입
+
+        sql = """
+        INSERT INTO lostitem_tags (
+            lost_item_id,
+            tag_id,
+            created_at,
+            updated_at
+        ) VALUES (%s, %s, %s, %s)
+        RETURNING id;
+        """
+
+        params = (
+            lost_item_id,
+            tag_id,
+            now,  # created_at
+            now  # updated_at
+        )
+
+        cursor.execute(sql, params)
+        lost_item_id = cursor.fetchone()[0]
+
         conn.commit()
 
         return record_id
