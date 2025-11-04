@@ -4,6 +4,7 @@ from mangum import Mangum
 from app.controller import items as items_router
 from app.controller import users as users_router
 from app.controller import tags as tags_router
+from app.controller import kiosks as kiosks_router
 
 app = FastAPI(
     title="Inha LostFound API",
@@ -22,5 +23,6 @@ def read_root():
 app.include_router(items_router.router, prefix="/items", tags=["Items"])
 app.include_router(users_router.router, prefix="/users", tags=["Users"])
 app.include_router(tags_router.router, prefix="/tags", tags=["Tags"])
+app.include_router(kiosks_router.router, prefix="/kiosk", tags=["Kiosk"])
 
 handler = Mangum(app)
