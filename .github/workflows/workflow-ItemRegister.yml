@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'ImageRegister/**'
+      - 'ItemRegister/**'
 
   workflow_dispatch:
     inputs:
@@ -64,5 +64,5 @@ jobs:
       - name: Deploy to AWS Lambda
         run: |
           aws lambda update-function-code \
-            --function-name ImageRegister \
-            --zip-file fileb://ImageRegister.zip
+            --function-name ItemRegister \
+            --zip-file fileb://ItemRegister.zip
