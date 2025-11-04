@@ -1,0 +1,3 @@
+# DB 연결 (PostgreSQL)
+SQLAlchemy
+psycopg2-binary
