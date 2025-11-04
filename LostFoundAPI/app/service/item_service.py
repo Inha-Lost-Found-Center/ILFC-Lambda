@@ -128,8 +128,8 @@ def search_items(db: Session, q: Optional[str], tags: Optional[List[int]]):
         # LostItem_Tags 테이블을 명시적으로 조인해야 함
         query = query.join(LostItem_Tags).filter(LostItem_Tags.tag_id.in_(tags))
 
-    # '분실' 상태인 것만 검색
-    query = query.filter(LostItems.status.in_(["분실"]))
+    # '분실' 상태인 것만 검색 -> 현재 모든 품목이 검색되도록 함.
+    # query = query.filter(LostItems.status.in_(["분실"]))
     
     query = query.group_by(LostItems.id)
 
