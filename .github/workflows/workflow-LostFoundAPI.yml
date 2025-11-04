@@ -22,6 +22,7 @@ on:
 
 jobs:
   deploy:
+    # Docker를 사용하므로 ubuntu-latest를 유지
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -45,7 +46,7 @@ jobs:
             -v "$PWD":/var/task \
             public.ecr.aws/lambda/python:3.12-x86_64 -c "pip install -r /var/task/requirements.txt -t /var/task"
 
-          find . -type d -name "__pycache__" -exec rm -rf {} +
+          sudo find . -type d -name "__pycache__" -exec rm -rf {} +
           
           zip -r ../LostFoundAPI.zip . -x "tests/*"
 
