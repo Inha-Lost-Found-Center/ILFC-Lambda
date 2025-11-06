@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from app.controller import items as items_router
@@ -11,6 +12,19 @@ app = FastAPI(
     version="0.1.0",
     openapi_prefix="/main",
     openapi_url="/openapi.json"
+)
+
+origins = [
+    "http://localhost:5173", # React 개발 서버 주소
+    "https://jong-sul-indol.vercel.app/" # 분실물센터 Web 배포 주소
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # 헬스 체크용 엔드포인트
