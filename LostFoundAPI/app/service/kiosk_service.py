@@ -32,8 +32,8 @@ def complete_pickup_by_code(db: Session, pickup_code_str: str):
     if item.status == "찾음":
         return "ALREADY_PICKED_UP"
 
-    if item.status != "보관":
-        return "NOT_IN_STORAGE"
+    if item.status != "예약":
+        return "NOT_RESERVE"
 
     # 상태 변경 및 기록 업데이트
     item.status = "찾음"

@@ -27,7 +27,7 @@ def get_item_by_id_with_tags(db: Session, item_id: int):
 
 def claim_item_by_id(db: Session, item_id: int, current_user: Users):
     """
-    현재 사용자가 특정 분실물을 '보관' 상태로 등록하고
+    현재 사용자가 특정 분실물을 '보관'에서 '예약' 상태로 등록하고
     픽업 코드를 생성합니다.
     """
 
@@ -36,11 +36,11 @@ def claim_item_by_id(db: Session, item_id: int, current_user: Users):
     if not item:
         return None  # 404: 아이템 없음
 
-    if item.status != "분실":
-        # 이미 등록(보관)되었거나, 이미 찾아감(찾음)
+    if item.status != "보관":
+        # 이미 예약되었거나, 이미 찾아감(찾음)
         return "ALREADY_CLAIMED"  # 400: 이미 처리된 아이템
 
-    item.status = "보관"
+    item.status = "예약"
     item.found_by_user_id = current_user.id
 
     new_code = pickup_code_service.create_pickup_code(
@@ -57,7 +57,7 @@ def claim_item_by_id(db: Session, item_id: int, current_user: Users):
 def get_claimed_items_by_user(db: Session, current_user: Users):
     """
     현재 사용자가 '주인 등록(claim)'한 모든 분실물 리스트를 조회합니다.
-    (상태가 '보관' 또는 '찾음'인 아이템)
+    (상태가 '예약' 또는 '찾음'인 아이템)
     """
     return (
         db.query(LostItems)
@@ -129,7 +129,7 @@ def search_items(db: Session, q: Optional[str], tags: Optional[List[int]]):
         query = query.join(LostItem_Tags).filter(LostItem_Tags.tag_id.in_(tags))
 
     # '분실' 상태인 것만 검색 -> 현재 모든 품목이 검색되도록 함.
-    # query = query.filter(LostItems.status.in_(["분실"]))
+    # query = query.filter(LostItems.status.in_(["보관"]))
     
     query = query.group_by(LostItems.id)
 

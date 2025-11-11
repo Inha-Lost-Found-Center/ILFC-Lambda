@@ -12,7 +12,7 @@ class LostItems(Base, TimestampMixin):
     location = Column(String(255), index=True)
     registered_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     description = Column(Text)
-    status = Column(String(50), default='분실', nullable=False)
+    status = Column(String(50), default='보관', nullable=False)
     found_at = Column(DateTime)
 
     # 외래 키 정의 (ondelete="SET NULL": 유저가 삭제되어도 분실물 기록은 남김)
