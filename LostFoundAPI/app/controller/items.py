@@ -59,6 +59,50 @@ async def get_my_claimed_items(
     )
     return items
 
+# 나의 픽업 예약 취소 API
+# ------------------------------------------------------------------
+@router.post("/me/{item_id}/cancel", response_model=item_schema.ItemResponse)
+async def cancel_my_reservation(
+        item_id: int,
+        cancel_data: item_schema.ReservationCancelRequest, # [추가] 취소 사유
+        db: Session = Depends(get_db),
+        current_user: Users = Depends(get_current_user)
+):
+    """
+    (인증 필요) 현재 사용자가 '예약'한 픽업을 취소하고
+    사유를 기록합니다. 아이템 상태는 '보관'으로 돌아갑니다.
+    """
+
+    result = item_service.cancel_reservation(
+        db=db,
+        item_id=item_id,
+        current_user=current_user,
+        cancel_reason=cancel_data.cancel_reason
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found"
+        )
+    if result == "FORBIDDEN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to cancel this reservation"
+        )
+    if result == "NOT_RESERVED":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This item is not in 'Reserved' status"
+        )
+    if result in ["CODE_NOT_FOUND", "ALREADY_USED", "ALREADY_CANCELLED", "NOT_YOURS"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot cancel: {result}"
+        )
+
+    return result
+
 # 1.6 나의 분실물 상세+코드 확인 API
 # ------------------------------------------------------------------
 @router.get("/me/{item_id}", response_model=item_schema.MyItemDetailResponse)

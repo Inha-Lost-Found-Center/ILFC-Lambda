@@ -134,3 +134,56 @@ def search_items(db: Session, q: Optional[str], tags: Optional[List[int]]):
     query = query.group_by(LostItems.id)
 
     return query.all()
+
+
+# [추가] 픽업 예약 취소 (서비스 로직)
+# ------------------------------------------------------------------
+def cancel_reservation(db: Session, item_id: int, current_user: Users, cancel_reason: str):
+    """
+    현재 사용자가 '예약'한 분실물에 대해 픽업을 취소하고
+    상태를 '보관'으로 되돌립니다.
+    """
+
+    item = db.query(LostItems).options(
+        joinedload(LostItems.pickup_code)
+    ).filter(LostItems.id == item_id).first()
+
+    if not item:
+        return None  # 404: 아이템 없음
+
+    if item.found_by_user_id != current_user.id:
+        return "FORBIDDEN"  # 403: 권한 없음
+
+    if item.status != "보관":
+        # '예약' 상태이거나, 이미 '찾음' 상태일 수 있음
+        return "NOT_YOURS"  # 400: 보관 상태가 아님
+
+    pickup_code = item.pickup_code
+
+    if not pickup_code:
+        return "CODE_NOT_FOUND" # 500: 예약 상태인데 코드가 없음
+
+    if pickup_code.is_used:
+        return "ALREADY_USED" # 400: 이미 사용된 코드
+
+    if pickup_code.cancelled_at is not None:
+        return "ALREADY_CANCELLED" # 400: 이미 취소된 코드
+
+    now = datetime.datetime.utcnow()
+
+    # PickupCodes 업데이트 (취소 사유 및 시각 기록)
+    pickup_code.cancelled_at = now
+    pickup_code.cancel_reason = cancel_reason
+    pickup_code.is_used = True;
+
+    # LostItems 업데이트 (상태 되돌리기)
+    item.status = "보관"  # '예약' -> '보관'
+    item.found_by_user_id = None
+    item.found_at = None
+
+    # 8. DB 커밋 및 반환
+    db.commit()
+    db.refresh(item)
+    db.refresh(pickup_code)
+
+    return item

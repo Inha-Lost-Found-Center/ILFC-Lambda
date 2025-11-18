@@ -28,3 +28,8 @@ class ClaimResponse(BaseModel):
 class MyItemDetailResponse(BaseModel):
     item: ItemResponse
     pickup_code: PickupCodeResponse
+
+# 픽업 예약 취소 요청 스키마
+# ------------------------------------------------------------------
+class ReservationCancelRequest(BaseModel):
+    cancel_reason: str # 사용자가 입력하는 취소 사유
