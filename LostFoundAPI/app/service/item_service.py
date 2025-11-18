@@ -154,8 +154,8 @@ def cancel_reservation(db: Session, item_id: int, current_user: Users, cancel_re
     if item.found_by_user_id != current_user.id:
         return "FORBIDDEN"  # 403: 권한 없음
 
-    if item.status != "보관":
-        # '예약' 상태이거나, 이미 '찾음' 상태일 수 있음
+    if item.status != "예약":
+        # '보관' 상태이거나, 이미 '찾음' 상태일 수 있음
         return "NOT_YOURS"  # 400: 보관 상태가 아님
 
     pickup_code = item.pickup_code
