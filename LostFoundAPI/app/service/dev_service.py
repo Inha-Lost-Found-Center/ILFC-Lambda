@@ -1,6 +1,7 @@
 import random
 from sqlalchemy.orm import Session
 from app.models import LostItems, Tags, Users
+from app.models.lost_item import LostItemStatus
 from app.service import tag_service  # (기존 tag_service 활용)
 
 # 미리 정의된 태그 목록 (랜덤 선택용)
@@ -45,7 +46,7 @@ def create_dummy_items(db: Session, count: int) -> list[LostItems]:
             device_name="TestAPI-Generator",
             location=location,
             description=description,
-            status="보관" # (기본 상태)
+            status=LostItemStatus.STORAGE
         )
 
         # 3. 태그 연결 (M2M 관계 활용)

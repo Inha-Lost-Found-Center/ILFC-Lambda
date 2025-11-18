@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from app.models import LostItems, Users, Tags, LostItem_Tags
+from app.models import LostItems, Users, Tags, LostItem_Tags, LostItemStatus
 from typing import List, Optional
 import datetime
 from app.service import pickup_code_service
@@ -36,11 +36,11 @@ def claim_item_by_id(db: Session, item_id: int, current_user: Users):
     if not item:
         return None  # 404: 아이템 없음
 
-    if item.status != "보관":
+    if item.status != LostItemStatus.STORAGE:
         # 이미 예약되었거나, 이미 찾아감(찾음)
         return "ALREADY_CLAIMED"  # 400: 이미 처리된 아이템
 
-    item.status = "예약"
+    item.status = LostItemStatus.RESERVED
     item.found_by_user_id = current_user.id
 
     new_code = pickup_code_service.create_pickup_code(
@@ -154,7 +154,7 @@ def cancel_reservation(db: Session, item_id: int, current_user: Users, cancel_re
     if item.found_by_user_id != current_user.id:
         return "FORBIDDEN"  # 403: 권한 없음
 
-    if item.status != "예약":
+    if item.status != LostItemStatus.RESERVED:
         # '보관' 상태이거나, 이미 '찾음' 상태일 수 있음
         return "NOT_YOURS"  # 400: 보관 상태가 아님
 
@@ -177,7 +177,7 @@ def cancel_reservation(db: Session, item_id: int, current_user: Users, cancel_re
     pickup_code.is_used = True;
 
     # LostItems 업데이트 (상태 되돌리기)
-    item.status = "보관"  # '예약' -> '보관'
+    item.status = LostItemStatus.STORAGE
     item.found_by_user_id = None
     item.found_at = None
 

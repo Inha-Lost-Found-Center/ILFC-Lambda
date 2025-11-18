@@ -1,7 +1,13 @@
+import enum
 from sqlalchemy import Column, String, BigInteger, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from .base import Base, TimestampMixin
 import datetime
+
+class LostItemStatus(str, enum.Enum):
+    STORAGE = "보관"
+    RESERVED = "예약"
+    FOUND = "찾음"
 
 class LostItems(Base, TimestampMixin):
     __tablename__ = "lostitems"

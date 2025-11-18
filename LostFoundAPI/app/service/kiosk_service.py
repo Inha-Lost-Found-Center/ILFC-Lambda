@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 import datetime
 
-from app.models import PickupCodes
+from app.models import PickupCodes, LostItemStatus
 from app.service.item_service import get_item_by_id_with_tags
 
 
@@ -29,14 +29,14 @@ def complete_pickup_by_code(db: Session, pickup_code_str: str):
     if not item:
         return "INVALID_CODE"
 
-    if item.status == "찾음":
+    if item.status == LostItemStatus.FOUND:
         return "ALREADY_PICKED_UP"
 
-    if item.status != "예약":
+    if item.status != LostItemStatus.RESERVED:
         return "NOT_RESERVE"
 
     # 상태 변경 및 기록 업데이트
-    item.status = "찾음"
+    item.status = LostItemStatus.FOUND
     item.found_at = now
 
     pickup_code_record.is_used = True
