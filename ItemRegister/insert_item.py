@@ -56,7 +56,7 @@ def insert_lost_item(file_url, category, description):
             '60주년',  # location
             now,  # registered_at
             description,  # description
-            '분실',  # default status
+            '보관',  # default status
             now,  # created_at
             now  # updated_at
         )
