@@ -7,3 +7,10 @@ class TagResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# 관리자용 태그 생성/수정 스키마
+class TagCreate(BaseModel):
+    name: str
+
+class TagUpdate(BaseModel):
+    name: str
