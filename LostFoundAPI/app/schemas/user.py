@@ -8,6 +8,10 @@ class UserCreate(BaseModel):
     name: str
     contact_info: str | None = None  # 선택적 정보 ( | None = None )
 
+# UserCreate를 상속받으므로 위 4개 필드는 자동으로 포함되고, 토큰만 추가됨
+class UserCreateVerified(UserCreate):
+    verification_token: str
+
 # 1.7 회원가입 (Response)
 # API가 '반환할' 데이터. 비밀번호는 절대 반환하면 안 됨.
 class UserResponse(BaseModel):
@@ -29,3 +33,17 @@ class Token(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+# 이메일 인증 요청 스키마 (이메일만 전송)
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+# 인증 코드 확인 요청 스키마 (이메일 + 코드)
+class VerificationRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+# 인증 성공 응답 스키마 (토큰 반환)
+class VerificationResponse(BaseModel):
+    message: str
+    verification_token: str

@@ -44,3 +44,8 @@ def authenticate_user(db: Session, user_in: user_schema.UserLogin):
     )
 
     return access_token
+
+def check_email_exists(db: Session, email: str) -> bool:
+    """이메일 중복 여부를 확인합니다. (True: 이미 존재함)"""
+    user = get_user_by_email(db, email)
+    return user is not None
