@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 import datetime
-from typing import List
+from typing import List, Optional
 from .tag import TagResponse
 from .pickup_code import PickupCodeResponse
 
@@ -33,3 +33,11 @@ class MyItemDetailResponse(BaseModel):
 # ------------------------------------------------------------------
 class ReservationCancelRequest(BaseModel):
     cancel_reason: str # 사용자가 입력하는 취소 사유
+
+# 관리자용 분실물 수동 등록 스키마
+class ItemCreate(BaseModel):
+    photo_url: str
+    device_name: Optional[str] = "ManualRegister" # 기본값
+    location: str
+    description: str
+    tags: List[str] = []  # 태그 이름 리스트 (예: ["지갑", "검정색"])
