@@ -33,3 +33,17 @@ class Token(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+# 이메일 인증 요청 스키마 (이메일만 전송)
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+# 인증 코드 확인 요청 스키마 (이메일 + 코드)
+class VerificationRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+# 인증 성공 응답 스키마 (토큰 반환)
+class VerificationResponse(BaseModel):
+    message: str
+    verification_token: str
