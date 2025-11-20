@@ -26,5 +26,4 @@ class PickupCodes(Base, TimestampMixin):
     # (Many-to-One) 이 코드를 소유한 사용자
     user = relationship("Users", back_populates="pickup_codes")
 
-    # (One-to-One) 이 코드가 가리키는 분실물
-    lost_item = relationship("LostItems", back_populates="pickup_code")
+    lost_item = relationship("LostItems", back_populates="pickup_codes")

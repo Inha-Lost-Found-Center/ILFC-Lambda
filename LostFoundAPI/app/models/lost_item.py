@@ -46,4 +46,12 @@ class LostItems(Base, TimestampMixin):
 
     found_by_user = relationship("Users", back_populates="found_items")
 
-    pickup_code = relationship("PickupCodes", back_populates="lost_item", uselist=False)
+    pickup_codes = relationship(
+        "PickupCodes",
+        back_populates="lost_item",
+        order_by="desc(PickupCodes.id)"
+    )
+
+    @property
+    def pickup_code(self):
+        return self.pickup_codes[0] if self.pickup_codes else None
