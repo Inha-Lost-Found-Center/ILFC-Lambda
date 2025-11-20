@@ -3,6 +3,7 @@ from app.models import LostItems, Users, Tags, LostItem_Tags, LostItemStatus, Pi
 from typing import List, Optional
 import datetime
 from app.service import pickup_code_service
+from app.service import tag_service
 
 def get_all_items_with_tags(db: Session):
     """
@@ -162,3 +163,23 @@ def cancel_reservation(db: Session, item_id: int, current_user: Users, cancel_re
     db.refresh(pickup_code)
 
     return item
+
+# 분실물 수동 생성 로직
+def create_lost_item(db: Session, item_in):
+    new_item = LostItems(
+        photo_url=item_in.photo_url,
+        device_name=item_in.device_name,
+        location=item_in.location,
+        description=item_in.description,
+        status=LostItemStatus.STORAGE
+    )
+
+    for tag_name in item_in.tags:
+        tag = tag_service.get_or_create_tag(db, tag_name)
+        new_item.tags.append(tag)
+
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+
+    return new_item

@@ -34,3 +34,15 @@ def create_pickup_code(db: Session, item: LostItems, user: Users) -> PickupCodes
     db.add(db_pickup_code)
 
     return db_pickup_code
+
+# 전체 픽업 로그 조회 (최신순)
+def get_all_pickup_logs(db: Session):
+    """
+    모든 픽업 코드 발급 이력을 조회합니다. (User, LostItem 정보 Join)
+    """
+    logs = db.query(PickupCodes).options(
+        joinedload(PickupCodes.user),
+        joinedload(PickupCodes.lost_item)
+    ).order_by(PickupCodes.generated_at.desc()).all()
+
+    return logs

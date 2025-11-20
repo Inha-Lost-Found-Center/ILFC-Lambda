@@ -5,3 +5,4 @@ from .tag import Tags
 from .lost_item_tag import LostItem_Tags
 from .user import Users
 from .pickup_code import PickupCodes
+from .manager import Managers, ManagerRole
