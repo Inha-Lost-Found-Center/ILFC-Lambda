@@ -19,7 +19,7 @@ class PickupCodes(Base, TimestampMixin):
     cancel_reason = Column(Text, nullable=True)     # '취소됨' 상태가 된 사유 (NULL 허용)
 
     # 외래 키
-    lost_item_id = Column(BigInteger, ForeignKey("lostitems.id", ondelete="CASCADE"), unique=True, nullable=False)
+    lost_item_id = Column(BigInteger, ForeignKey("lostitems.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
 
