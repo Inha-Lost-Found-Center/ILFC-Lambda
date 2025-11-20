@@ -1,6 +1,6 @@
 import random
 import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models import PickupCodes, LostItems, Users
 
 def generate_unique_code(db: Session, length: int = 6) -> str:
