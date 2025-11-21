@@ -9,6 +9,7 @@ from app.controller import tags as tags_router
 from app.controller import kiosks as kiosks_router
 from app.controller import dev as dev_router
 from app.controller import admin as admin_router
+from app.controller import locker as locker_router
 
 app = FastAPI(
     title="Inha LostFound API",
@@ -66,6 +67,7 @@ app.include_router(items_router.router, prefix="/items", tags=["Items"])
 app.include_router(users_router.router, prefix="/users", tags=["Users"])
 app.include_router(tags_router.router, prefix="/tags", tags=["Tags"])
 app.include_router(kiosks_router.router, prefix="/kiosk", tags=["Kiosk"])
+app.include_router(locker_router.router, prefix="/locker", tags=["Smart Locker"])
 app.include_router(admin_router.router, prefix="/admin", tags=["Admin"])
 app.include_router(dev_router.router, prefix="/dev", tags=["Development"])
 

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     AWS_REGION: str = "us-west-2"
     DYNAMODB_TABLE_VERIFICATION: str = "inha-capstone-14-VerificationCodes"
+    AWS_IOT_ENDPOINT: str
 
     GMAIL_USER: str
     GMAIL_PASSWORD: str
