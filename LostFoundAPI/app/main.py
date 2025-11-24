@@ -21,7 +21,8 @@ app = FastAPI(
 origins = [
     "http://localhost:5173",             # React 개발 서버 주소
     "https://jong-sul-indol.vercel.app/", # 분실물센터 Web 배포 주소
-    "https://main.d2uqv8vbmzw3om.amplifyapp.com" # 관리자 Web 배포 주소
+    "https://main.d2uqv8vbmzw3om.amplifyapp.com", # 관리자 Web 배포 주소
+    "https://jong-sul-kiosk.vercel.app/" #키오스크 Web 배포 주소
 ]
 
 app.add_middleware(
