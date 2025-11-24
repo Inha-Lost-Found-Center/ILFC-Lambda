@@ -26,3 +26,21 @@ async def generate_dummy_items(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"테스트 데이터 생성 실패: {str(e)}"
         )
+
+
+@router.delete("/delete-dummy-items", summary="테스트용 더미 데이터 삭제")
+async def delete_dummy_items(
+        db: Session = Depends(get_db)
+):
+    """
+    device_name이 'TestAPI-Generator'인 테스트 데이터(아이템 및 관련 픽업 코드)를 삭제합니다.
+    """
+    try:
+        deleted_count = dev_service.delete_dummy_items(db)
+        return {"deleted_items": deleted_count}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"테스트 데이터 삭제 실패: {str(e)}"
+        )

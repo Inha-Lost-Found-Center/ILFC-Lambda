@@ -1,6 +1,7 @@
 import random
 from sqlalchemy.orm import Session
-from app.models import LostItems, Tags, Users
+from sqlalchemy.orm import Session
+from app.models import LostItems, Tags, Users, PickupCodes
 from app.models.lost_item import LostItemStatus
 from app.service import tag_service  # (기존 tag_service 활용)
 
@@ -45,6 +46,7 @@ def create_dummy_items(db: Session, count: int) -> list[LostItems]:
             photo_url=photo_url,
             device_name="TestAPI-Generator",
             location=location,
+            locker_id=1,
             description=description,
             status=LostItemStatus.STORAGE
         )
@@ -61,3 +63,21 @@ def create_dummy_items(db: Session, count: int) -> list[LostItems]:
 
     # 5. 생성된 객체 반환
     return created_items
+
+
+def delete_dummy_items(db: Session) -> int:
+    """
+    device_name이 'TestAPI-Generator'인 아이템과 관련 픽업 코드를 삭제합니다.
+    """
+    # 먼저 관련 픽업 코드 삭제
+    pickup_count = db.query(PickupCodes).join(LostItems).filter(
+        LostItems.device_name == "TestAPI-Generator"
+    ).delete(synchronize_session=False)
+
+    # 그 다음 아이템 삭제
+    item_count = db.query(LostItems).filter(
+        LostItems.device_name == "TestAPI-Generator"
+    ).delete(synchronize_session=False)
+
+    db.commit()
+    return item_count
