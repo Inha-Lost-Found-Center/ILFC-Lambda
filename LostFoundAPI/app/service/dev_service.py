@@ -69,14 +69,21 @@ def delete_dummy_items(db: Session) -> int:
     """
     device_name이 'TestAPI-Generator'인 아이템과 관련 픽업 코드를 삭제합니다.
     """
-    # 먼저 관련 픽업 코드 삭제
-    pickup_count = db.query(PickupCodes).join(LostItems).filter(
-        LostItems.device_name == "TestAPI-Generator"
+    item_ids = [
+        item_id for (item_id,) in db.query(LostItems.id).filter(
+            LostItems.device_name == "TestAPI-Generator"
+        ).all()
+    ]
+
+    if not item_ids:
+        return 0
+
+    db.query(PickupCodes).filter(
+        PickupCodes.lost_item_id.in_(item_ids)
     ).delete(synchronize_session=False)
 
-    # 그 다음 아이템 삭제
     item_count = db.query(LostItems).filter(
-        LostItems.device_name == "TestAPI-Generator"
+        LostItems.id.in_(item_ids)
     ).delete(synchronize_session=False)
 
     db.commit()
