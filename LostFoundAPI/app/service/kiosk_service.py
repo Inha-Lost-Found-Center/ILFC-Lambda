@@ -45,3 +45,22 @@ def complete_pickup_by_code(db: Session, pickup_code_str: str):
     db.refresh(item)
 
     return item
+
+
+def fetch_item_by_pickup_code(db: Session, pickup_code_str: str):
+    """
+    픽업 코드로 아이템 정보를 조회합니다. (상태 변경 없음)
+    """
+    pickup_code_record = db.query(PickupCodes).filter(
+        PickupCodes.code == pickup_code_str
+    ).first()
+
+    if not pickup_code_record:
+        return "INVALID_CODE"
+
+    item = get_item_by_id_with_tags(db, item_id=pickup_code_record.lost_item_id)
+
+    if not item:
+        return "INVALID_CODE"
+
+    return item

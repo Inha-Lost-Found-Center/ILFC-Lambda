@@ -1,3 +1,17 @@
+def open_chute(device_name: str) -> str:
+    message = {
+        "action": "OPEN_CHUTE"
+    }
+    topic = f"locker/chute/{device_name}"
+    return _publish(topic, message)
+
+
+def close_chute(device_name: str) -> str:
+    message = {
+        "action": "CLOSE_CHUTE"
+    }
+    topic = f"locker/chute/{device_name}"
+    return _publish(topic, message)
 import json
 import boto3
 
@@ -46,6 +60,16 @@ def open_locker(device_name: str, locker_id: int) -> str:
         "action": "OPEN",
         "locker_id": locker_id
     }
-    topic = f"locker/control/{device_name}"
+    topic = f"locker/compartment/{device_name}"
+    return _publish(topic, message)
+
+
+def close_locker(device_name: str, locker_id: int, pickup_code: str | None = None) -> str:
+    message = {
+        "action": "CLOSE",
+        "locker_id": locker_id,
+        "pickup_code": pickup_code
+    }
+    topic = f"locker/compartment/{device_name}"
     return _publish(topic, message)
 
