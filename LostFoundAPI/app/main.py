@@ -20,14 +20,14 @@ app = FastAPI(
 
 origins = [
     "http://localhost:5173",             # React 개발 서버 주소
-    "https://jong-sul-indol.vercel.app/", # 분실물센터 Web 배포 주소
+    "https://jong-sul-indol.vercel.app", # 분실물센터 Web 배포 주소
     "https://main.d2uqv8vbmzw3om.amplifyapp.com", # 관리자 Web 배포 주소
-    "https://jong-sul-kiosk.vercel.app/" #키오스크 Web 배포 주소
+    "https://jong-sul-kiosk.vercel.app" #키오스크 Web 배포 주소
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,7 +50,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     # 요청한 origin이 허용된 origins 리스트에 있다면,
     # 해당 origin을 Access-Control-Allow-Origin 헤더에 추가
     if origin in origins:
-        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Methods'] = '*'
         response.headers['Access-Control-Allow-Headers'] = '*'
