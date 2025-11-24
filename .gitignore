@@ -1,4 +1,7 @@
 /.idea/
 /venv
 /LostFoundAPI/.env
+/LostFoundAPI/app/__pycache__/
 .env
+__pycache__/
+*.pyc
