@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import Optional
 
 from app.db.session import get_db
 from app.service import kiosk_service
@@ -55,3 +56,33 @@ async def complete_item_pickup(
         "message": f"픽업 코드 {pickup_data.pickup_code}가 확인되었으며, 아이템이 인계되었습니다.",
         "item": result
     }
+
+
+# ==================================================
+# 분실물 등록 트리거 (라즈베리파이 촬영 지시)
+# ==================================================
+class ItemRegisterRequest(BaseModel):
+    device_name: str
+    location: Optional[str] = None
+
+
+@router.post("/register/request", summary="키오스크 → IoT 분실물 등록 요청")
+async def kiosk_request_item_registration(payload: ItemRegisterRequest):
+    """
+    키오스크에서 라즈베리파이에게 촬영 및 업로드를 지시하는 MQTT 명령을 발행합니다.
+    """
+    try:
+        aws_request_id = kiosk_service.request_item_registration(
+            device_name=payload.device_name,
+            location=payload.location
+        )
+        return {
+            "status": "queued",
+            "device_name": payload.device_name,
+            "aws_request_id": aws_request_id
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"등록 명령 전송 실패: {str(e)}"
+        )

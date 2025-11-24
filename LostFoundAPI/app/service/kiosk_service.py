@@ -1,9 +1,28 @@
 # LostFoundAPI/app/service/kiosk_service.py
 from sqlalchemy.orm import Session
 import datetime
+import json
+import boto3
 
 from app.models import PickupCodes, LostItemStatus
 from app.service.item_service import get_item_by_id_with_tags
+from app.core.config import settings
+
+# ==================================================
+# AWS IoT Core 설정 (키오스크 공용)
+# ==================================================
+AWS_REGION = settings.AWS_REGION
+IOT_ENDPOINT = settings.AWS_IOT_ENDPOINT
+
+try:
+    kiosk_iot_client = boto3.client(
+        "iot-data",
+        region_name=AWS_REGION,
+        endpoint_url=IOT_ENDPOINT
+    )
+except Exception as e:
+    print(f"Kiosk AWS IoT Client 초기화 실패: {e}")
+    kiosk_iot_client = None
 
 
 def complete_pickup_by_code(db: Session, pickup_code_str: str):
@@ -45,3 +64,27 @@ def complete_pickup_by_code(db: Session, pickup_code_str: str):
     db.refresh(item)
 
     return item
+
+
+def request_item_registration(device_name: str, location: str | None):
+    """
+    라즈베리파이에게 분실물 등록(w/ 촬영) 요청을 전달.
+    """
+    if kiosk_iot_client is None:
+        raise RuntimeError("AWS IoT 클라이언트가 초기화되지 않았습니다.")
+
+    message = {
+        "action": "REQUEST_REGISTER",
+        "device_name": device_name,
+        "meta": {
+            "location": location
+        }
+    }
+
+    response = kiosk_iot_client.publish(
+        topic=f"locker/register/{device_name}",
+        qos=1,
+        payload=json.dumps(message)
+    )
+
+    return response.get("ResponseMetadata", {}).get("RequestId")
