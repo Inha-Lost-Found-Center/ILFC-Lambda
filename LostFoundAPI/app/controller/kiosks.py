@@ -30,7 +30,16 @@ class LockerCloseResponse(BaseModel):
     device_name: str
 
 # 픽업 코드 검증 및 아이템 상태 변경 API
-@router.post("/pickup", response_model=KioskPickupResponse)
+@router.post(
+    "/pickup",
+    response_model=KioskPickupResponse,
+    summary="픽업 코드 확인 및 사물함 열기",
+    description=(
+        "키오스크에서 손님이 입력한 6자리 픽업 코드를 검증하고 아이템을 '찾음' 상태로 갱신합니다.\n"
+        "- 검증이 성공하면 할당된 사물함 번호(`item.locker_id`)와 기기(`item.device_name`)를 찾아 자동으로 사물함을 엽니다.\n"
+        "- 코드가 만료되었거나 이미 사용된 경우, 상황에 맞는 HTTP 오류를 반환합니다."
+    )
+)
 async def complete_item_pickup(
         pickup_data: PickupRequest,
         db: Session = Depends(get_db),
@@ -87,7 +96,16 @@ async def complete_item_pickup(
     }
 
 
-@router.post("/locker/close", response_model=LockerCloseResponse, summary="키오스크 → 사물함 닫기")
+@router.post(
+    "/locker/close",
+    response_model=LockerCloseResponse,
+    summary="사물함 닫기 (버튼/타이머)",
+    description=(
+        "키오스크에서 닫기 버튼을 눌렀거나 로컬 타이머가 만료되었을 때 호출합니다.\n"
+        "- 요청 본문에 픽업 코드를 전달하면 해당 아이템을 찾아 연결된 `locker_id`·`device_name`으로 IoT CLOSE 명령을 발행합니다.\n"
+        "- 아이템 상태는 변경하지 않고, 문 닫기만 수행합니다."
+    )
+)
 async def kiosk_close_locker(
         close_data: LockerCloseRequest,
         db: Session = Depends(get_db),
@@ -148,7 +166,15 @@ class ItemRegisterRequest(BaseModel):
     location: Optional[str] = None
 
 
-@router.post("/register/request", summary="키오스크 → IoT 분실물 등록 요청")
+@router.post(
+    "/register/request",
+    summary="분실물 등록 촬영 요청",
+    description=(
+        "키오스크에서 분실물 등록을 시작할 때 호출해 라즈베리파이(혹은 IoT 디바이스)에게 촬영/업로드를 지시합니다.\n"
+        "- `device_name`은 사물함(또는 투입구)이 연결된 장비 이름, `location`은 분실물이 수거된 위치입니다.\n"
+        "- 서버는 `locker/register/{device_name}` 토픽으로 MQTT 메시지를 발행하고, 응답으로 AWS Request ID를 돌려줍니다."
+    )
+)
 async def kiosk_request_item_registration(payload: ItemRegisterRequest):
     """
     키오스크에서 라즈베리파이에게 촬영 및 업로드를 지시하는 MQTT 명령을 발행합니다.
@@ -183,7 +209,16 @@ class LockerOpenResponse(BaseModel):
     aws_request_id: str | None = None
 
 
-@router.post("/locker/open", response_model=LockerOpenResponse, summary="키오스크 → 사물함 열기")
+@router.post(
+    "/locker/open",
+    response_model=LockerOpenResponse,
+    summary="투입구/사물함 열기",
+    description=(
+        "키오스크에서 투입구 또는 특정 사물함을 열 때 호출합니다.\n"
+        "- `open_chute=True`이면 투입구 전용 토픽(`locker/chute/{device_name}`)으로 OPEN_CHUTE 명령을 발행합니다.\n"
+        "- `open_chute=False`이면 `locker_id`가 필수이며, 해당 사물함 문을 여는 MQTT 명령을 발행합니다."
+    )
+)
 async def kiosk_open_locker(open_data: LockerOpenRequest):
     """
     키오스크에서 투입구/사물함을 열어달라고 요청할 때 호출합니다.
