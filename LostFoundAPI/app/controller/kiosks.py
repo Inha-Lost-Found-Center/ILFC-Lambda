@@ -1,11 +1,11 @@
 # LostFoundAPI/app/controller/kiosks.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 
 from app.db.session import get_db
-from app.service import kiosk_service
+from app.service import kiosk_service, locker_service
 from app.schemas import item as item_schema
 
 router = APIRouter()
@@ -23,7 +23,8 @@ class KioskPickupResponse(BaseModel):
 @router.post("/pickup", response_model=KioskPickupResponse)
 async def complete_item_pickup(
         pickup_data: PickupRequest,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        background_tasks: BackgroundTasks = None
 ):
     """
     (키오스크 전용) 픽업 코드를 검증하고, 유효하면 해당 분실물의 상태를
@@ -52,6 +53,24 @@ async def complete_item_pickup(
             detail="보관 상태가 아닌 분실물입니다. (분실 상태이거나, 다른 상태)"
         )
 
+    locker_id = getattr(result, "locker_id", None)
+    device_name = getattr(result, "device_name", None)
+    if locker_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="해당 분실물에 할당된 사물함 정보가 없습니다."
+        )
+    if not device_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="해당 분실물에 연결된 기기 정보가 없습니다."
+        )
+
+    if background_tasks is not None:
+        background_tasks.add_task(locker_service.open_locker, device_name, locker_id)
+    else:
+        locker_service.open_locker(device_name, locker_id)
+
     return {
         "message": f"픽업 코드 {pickup_data.pickup_code}가 확인되었으며, 아이템이 인계되었습니다.",
         "item": result
@@ -72,7 +91,7 @@ async def kiosk_request_item_registration(payload: ItemRegisterRequest):
     키오스크에서 라즈베리파이에게 촬영 및 업로드를 지시하는 MQTT 명령을 발행합니다.
     """
     try:
-        aws_request_id = kiosk_service.request_item_registration(
+        aws_request_id = locker_service.request_item_registration(
             device_name=payload.device_name,
             location=payload.location
         )

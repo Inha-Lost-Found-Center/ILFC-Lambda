@@ -9,6 +9,8 @@ class ItemResponse(BaseModel):
     id: int
     photo_url: str
     location: str | None = None
+    locker_id: int | None = None
+    device_name: str | None = None
     status: str
     registered_at: datetime.datetime
 

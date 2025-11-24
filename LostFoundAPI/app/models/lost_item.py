@@ -17,6 +17,7 @@ class LostItems(Base, TimestampMixin):
     photo_url = Column(String(2048), nullable=False)
     device_name = Column(String(255))
     location = Column(String(255), index=True)
+    locker_id = Column(BigInteger, nullable=True, index=True)
     registered_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     description = Column(Text)
 
