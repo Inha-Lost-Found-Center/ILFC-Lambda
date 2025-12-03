@@ -26,12 +26,15 @@ def insert_lost_item(file_url, category, description):
 
         # Tag 찾기
         sql = """
-        SELECT id FROM tags WHERE name = %s;
+        SELECT id, locker_number FROM tags WHERE name = %s;
         """
 
         cursor.execute(sql, (category,))
 
-        tag_id = cursor.fetchone()[0]
+        row = cursor.fetchone()
+
+        tag_id = row[0]
+        locker_number = row[1]
 
         # LostItems 레코드 삽입
         sql = """
@@ -88,7 +91,8 @@ def insert_lost_item(file_url, category, description):
 
         conn.commit()
 
-        return record_id
+        return locker_number
+
     finally:
         cursor.close()
         conn.close()
