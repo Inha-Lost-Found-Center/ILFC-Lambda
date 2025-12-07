@@ -73,7 +73,8 @@ async def complete_item_pickup(
         )
 
     locker_id = getattr(result, "locker_id", None)
-    device_name = getattr(result, "device_name", None)
+    # device_name = getattr(result, "device_name", None)
+    device_name = "InhaLockerPi2"
     if locker_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -128,7 +129,8 @@ async def kiosk_close_locker(
         )
 
     locker_id = getattr(item, "locker_id", None)
-    device_name = getattr(item, "device_name", None)
+    # device_name = getattr(item, "device_name", None)
+    device_name = "InhaLockerPi2"
 
     if locker_id is None:
         raise HTTPException(
