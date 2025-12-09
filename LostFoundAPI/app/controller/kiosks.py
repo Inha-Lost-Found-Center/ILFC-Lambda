@@ -72,7 +72,7 @@ async def complete_item_pickup(
             detail="보관 상태가 아닌 분실물입니다. (분실 상태이거나, 다른 상태)"
         )
 
-    device_name = getattr(result, "device_name", None)
+    device_name = "InhaLockerPi2"
     locker_id = None
     if hasattr(result, "tags") and result.tags:
         first_tag = result.tags[0]
@@ -82,11 +82,7 @@ async def complete_item_pickup(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="할당된 사물함( locker_number ) 정보를 태그에서 찾을 수 없습니다."
         )
-    if not device_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="해당 분실물에 연결된 기기 정보가 없습니다."
-        )
+    # device_name은 장비명을 고정 사용
 
     if background_tasks is not None:
         background_tasks.add_task(locker_service.open_locker, device_name, locker_id)
@@ -136,20 +132,18 @@ async def kiosk_close_locker(
             detail="유효하지 않은 픽업 코드입니다."
         )
 
-    locker_id = getattr(item, "locker_id", None)
-    # device_name = getattr(item, "device_name", None)
     device_name = "InhaLockerPi2"
+    locker_id = None
+    if hasattr(item, "tags") and item.tags:
+        first_tag = item.tags[0]
+        locker_id = getattr(first_tag, "locker_number", None)
 
     if locker_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="해당 분실물에 할당된 사물함 정보가 없습니다."
+            detail="할당된 사물함( locker_number ) 정보를 태그에서 찾을 수 없습니다."
         )
-    if not device_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="해당 분실물에 연결된 기기 정보가 없습니다."
-        )
+    # device_name은 장비명을 고정 사용
 
     if background_tasks is not None:
         background_tasks.add_task(
@@ -160,6 +154,11 @@ async def kiosk_close_locker(
         )
     else:
         locker_service.close_locker(device_name, locker_id, close_data.pickup_code)
+
+    try:
+        setattr(item, "locker_id", locker_id)
+    except Exception:
+        pass
 
     return {
         "message": f"사물함 {locker_id}번 닫기 명령이 전송되었습니다.",
