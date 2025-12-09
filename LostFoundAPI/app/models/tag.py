@@ -7,6 +7,7 @@ class Tags(Base, TimestampMixin):
 
     id = Column(BigInteger, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False)
+    locker_number = Column(BigInteger, nullable=True, index=True)
 
     # (LostItems와의 M2M 관계)
     lost_items = relationship(

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class TagResponse(BaseModel):
     id: int
     name: str
+    locker_number: int | None = None
 
     class Config:
         from_attributes = True

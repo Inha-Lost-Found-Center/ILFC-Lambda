@@ -72,13 +72,15 @@ async def complete_item_pickup(
             detail="보관 상태가 아닌 분실물입니다. (분실 상태이거나, 다른 상태)"
         )
 
-    locker_id = getattr(result, "locker_id", None)
-    # device_name = getattr(result, "device_name", None)
-    device_name = "InhaLockerPi2"
+    device_name = getattr(result, "device_name", None)
+    locker_id = None
+    if hasattr(result, "tags") and result.tags:
+        first_tag = result.tags[0]
+        locker_id = getattr(first_tag, "locker_number", None)
     if locker_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="해당 분실물에 할당된 사물함 정보가 없습니다."
+            detail="할당된 사물함( locker_number ) 정보를 태그에서 찾을 수 없습니다."
         )
     if not device_name:
         raise HTTPException(
