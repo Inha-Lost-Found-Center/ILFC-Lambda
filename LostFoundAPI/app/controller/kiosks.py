@@ -93,6 +93,12 @@ async def complete_item_pickup(
     else:
         locker_service.open_locker(device_name, locker_id)
 
+    # 응답에 사물함 번호를 명시적으로 넣어준다 (locker_id 필드에 매핑)
+    try:
+        setattr(result, "locker_id", locker_id)
+    except Exception:
+        pass
+
     return {
         "message": f"픽업 코드 {pickup_data.pickup_code}가 확인되었으며, 아이템이 인계되었습니다.",
         "item": result
